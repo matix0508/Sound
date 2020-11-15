@@ -56,14 +56,15 @@ def config_threshold():
         data = numpy.log10(numpy.sqrt(
                 numpy.real(data)**2+numpy.imag(data)**2) / BUFFER) * 10
         mean = data.mean()
-        if not mean:
-            print("passing")
-            continue
-        noise.append(data.mean())
-        print(f"Actual noise mean: {data.mean()}")
+
+        if mean > -50:
+            noise.append(mean)
+            print(f"Actual noise mean: {mean}")
+        else:
+            print("ERROR :: -inf")
     noise = numpy.array(noise)
     print(f"MEAN: {noise.mean()}")
-    return noise.mean() + 20
+    return noise.mean() + 15
 
 THRESHOLD = config_threshold()
 print(THRESHOLD)
