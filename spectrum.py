@@ -44,16 +44,23 @@ def the_same(lst, start, stop):
 
 def config_threshold():
     noise = []
+    print("Configuring the noise...")
     for i in range(100):
         try:
             data = numpy.fft.rfft(numpy.fromstring(
                 stream.read(BUFFER), dtype=numpy.float32)
             )
+
         except IOError:
             pass
         data = numpy.log10(numpy.sqrt(
                 numpy.real(data)**2+numpy.imag(data)**2) / BUFFER) * 10
+        mean = data.mean()
+        if not mean:
+            print("passing")
+            continue
         noise.append(data.mean())
+        print(f"Actual noise mean: {data.mean()}")
     noise = numpy.array(noise)
     print(f"MEAN: {noise.mean()}")
     return noise.mean() + 20
@@ -77,6 +84,13 @@ def check_freq(data):
             print(f"New Frequency: {val}Hz")
             freqs[0] = val
 
+def check_clap(data):
+    if data.mean() > THRESHOLD:
+        print("Clap!")
+        return True
+    else:
+        return False
+
 def update_line(i):
     try:
         data = numpy.fft.rfft(numpy.fromstring(
@@ -87,6 +101,7 @@ def update_line(i):
     data = numpy.log10(numpy.sqrt(
             numpy.real(data)**2+numpy.imag(data)**2) / BUFFER) * 10
     check_freq(data)
+    check_clap(data)
         #print(f"new frequency detected: {r[numpy.argmax(data)]}: {numpy.max(data)}dB")
     line1.set_data(r, data)
     line2.set_data(numpy.maximum(line1.get_data(), line2.get_data()))
